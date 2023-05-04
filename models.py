@@ -3,7 +3,7 @@ from pydantic import BaseModel
 
 class User(BaseModel):
     username: str
-    password: str | None = None
+    password: str
 
 
 class VaultUpdate(User):

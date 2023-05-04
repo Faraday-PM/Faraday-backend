@@ -1,6 +1,7 @@
 from util.keyderivation import derive_auth_key
 from fastapi import FastAPI, Depends, HTTPException
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from fastapi.middleware.cors import CORSMiddleware
 import db_interaction
 from util.common import load_config
 from typing import Annotated
@@ -14,6 +15,16 @@ config: dict = load_config()
 app: FastAPI = FastAPI()
 
 # oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+
+origins = ["*"]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"]
+)
 
 
 @app.get('/')
@@ -47,3 +58,17 @@ async def update_vault(user: VaultUpdate):
     res: str = db.login(user.username, hashed_password)
     db.update_vault(user.username, user.vault)
     return {"msg": "Successful"}
+
+
+# Essentially better syntax for api
+# Same as /auth route
+@app.get("/vault")
+async def get_vault(user: User):
+    hashed_password = derive_auth_key(user.password, config["salt"].encode(config["format"]))
+    res: str = db.login(user.username, hashed_password)
+
+    base64_vault: str = db.get_vault(user.username)
+    return {
+        "msg": res,
+        "vault": base64_vault
+        }
