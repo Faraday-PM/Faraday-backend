@@ -6,7 +6,8 @@ import db_interaction
 from util.common import load_config
 from typing import Annotated
 from models import User, VaultUpdate
-
+import requests
+import base64
 
 db: db_interaction.DatabaseHandler = db_interaction.DatabaseHandler()
 
@@ -25,7 +26,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"]
 )
-
+ 
 
 @app.get('/')
 async def root():
@@ -72,3 +73,13 @@ async def get_vault(user: User):
         "msg": res,
         "vault": base64_vault
         }
+
+@app.get("/favicon")
+def get_favicon(url: str):
+    url = url.replace("http://", "").replace("https://", "")
+    try:
+        with open("utils/favicons/{url}.png", "rb") as img_file:
+            encodedIcon = base64.b64encode(img_file.read())
+    except FileNotFoundError:
+        pass
+    return {"msg": encodedIcon}
