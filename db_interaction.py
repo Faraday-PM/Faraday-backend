@@ -6,6 +6,7 @@ from util.common import load_config
 from cryptography.hazmat.primitives import constant_time
 from fastapi import HTTPException
 import base64
+from Crypto.Random import get_random_bytes
 
 config: dict = load_config()
 
@@ -26,6 +27,7 @@ class Vault(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     master = Column(String, ForeignKey("users.username"), unique=True)
     vault = Column(String)
+    iv = Column(String)
 
 
 # Probably not a good idea to load more than one instance of DatabaseHandler
@@ -57,7 +59,13 @@ class DatabaseHandler:
             raise HTTPException(status_code=400, detail="Incorrect username or password")
         except UnboundLocalError:       # No user found
             raise HTTPException(status_code=400, detail="Incorrect username or password")
-    
+
+    @staticmethod
+    def get_iv(username):
+        cursor = session.query(Vault).filter(Vault.master == username)
+        for vault in cursor:
+            return str(vault.iv)
+
     @staticmethod
     def get_vault(username):
         cursor = session.query(Vault).filter(Vault.master == username)
@@ -66,7 +74,7 @@ class DatabaseHandler:
 
     @staticmethod
     def create_vault(master: str, vault: str = base64.b64encode("{}".encode(config["format"]))):
-        v = Vault(master=master, vault=vault)
+        v = Vault(master=master, vault=vault, iv=get_random_bytes(16).hex())
         session.rollback()
         session.add(v)
         session.commit()

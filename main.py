@@ -26,7 +26,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"]
 )
- 
+
 
 @app.get('/')
 async def root():
@@ -35,51 +35,58 @@ async def root():
 
 @app.post("/register")
 async def register(user: User):
-    hashed_password = derive_auth_key(user.password, config["salt"].encode(config["format"]))
+    hashed_password = derive_auth_key(
+        user.password, config["salt"].encode(config["format"]))
     res = db.create_user(user.username, hashed_password)
     db.create_vault(user.username)
     return {"msg": res}
 
 
+
+# Get vault
 @app.post("/auth")
 async def login(user: User):
-    hashed_password = derive_auth_key(user.password, config["salt"].encode(config["format"]))
+    hashed_password = derive_auth_key(
+        user.password, config["salt"].encode(config["format"]))
     res: str = db.login(user.username, hashed_password)
 
     base64_vault: str = db.get_vault(user.username)
     return {
         "msg": res,
         "vault": base64_vault
-        }
+    }
 
 
+# Update vault
 @app.post("/vault")
 async def update_vault(user: VaultUpdate):
-    hashed_password = derive_auth_key(user.password, config["salt"].encode(config["format"]))
+    hashed_password = derive_auth_key(
+        user.password, config["salt"].encode(config["format"]))
     res: str = db.login(user.username, hashed_password)
     db.update_vault(user.username, user.vault)
-    return {"msg": "Successful"}
+    return {"msg": res}
 
-
-# Essentially better syntax for api
-# Same as /auth route
-@app.get("/vault")
-async def get_vault(user: User):
-    hashed_password = derive_auth_key(user.password, config["salt"].encode(config["format"]))
-    res: str = db.login(user.username, hashed_password)
-
-    base64_vault: str = db.get_vault(user.username)
-    return {
-        "msg": res,
-        "vault": base64_vault
-        }
 
 @app.get("/favicon")
-def get_favicon(url: str):
+async def get_favicon(url: str):
     url = url.replace("http://", "").replace("https://", "")
     try:
-        with open("utils/favicons/{url}.png", "rb") as img_file:
+        print(url)
+        with open(f"util/favicons/{url}.png", "rb") as img_file:
             encodedIcon = base64.b64encode(img_file.read())
-    except FileNotFoundError:
-        pass
+    except FileNotFoundError as e:
+        print(e)
+        encodedIcon = ""
     return {"msg": encodedIcon}
+
+
+# Hopefully protected and no security flaws
+@app.post("/iv")
+async def getIv(user: User):
+    hashed_password = derive_auth_key(user.password, config["salt"].encode(config["format"]))
+    res: str = db.login(user.username, hashed_password)
+    if res == "Successfully authenticated!":
+        iv = db.get_iv(user.username)
+        return {"msg": res, "iv": iv}
+    else:
+        return {"msg": "User not found"}
