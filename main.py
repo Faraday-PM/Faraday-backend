@@ -8,6 +8,8 @@ from typing import Annotated
 from models import User, VaultUpdate
 import requests
 import base64
+import grab_favicon as gf
+
 
 db: db_interaction.DatabaseHandler = db_interaction.DatabaseHandler()
 
@@ -42,7 +44,6 @@ async def register(user: User):
     return {"msg": res}
 
 
-
 # Get vault
 @app.post("/auth")
 async def login(user: User):
@@ -75,15 +76,17 @@ async def get_favicon(url: str):
         with open(f"util/favicons/{url}.png", "rb") as img_file:
             encodedIcon = base64.b64encode(img_file.read())
     except FileNotFoundError as e:
-        print(e)
-        encodedIcon = ""
+        gf.download_favicon(url, "util/favicons")
+        with open(f"util/favicons/{url}.png", "rb") as img_file:
+            encodedIcon = base64.b64encode(img_file.read())
     return {"msg": encodedIcon}
 
 
 # Hopefully protected and no security flaws
 @app.post("/iv")
 async def getIv(user: User):
-    hashed_password = derive_auth_key(user.password, config["salt"].encode(config["format"]))
+    hashed_password = derive_auth_key(
+        user.password, config["salt"].encode(config["format"]))
     res: str = db.login(user.username, hashed_password)
     if res == "Successfully authenticated!":
         iv = db.get_iv(user.username)
