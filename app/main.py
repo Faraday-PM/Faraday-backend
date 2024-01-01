@@ -1,11 +1,11 @@
-from util.keyderivation import derive_auth_key
+from app.util.keyderivation import derive_auth_key
 from fastapi import FastAPI, Depends, HTTPException
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from fastapi.middleware.cors import CORSMiddleware
-import db_interaction
-from util.common import load_config
+import app.db_interaction as db_interaction
+from app.util.common import load_config
 from typing import Annotated
-from models import User, VaultUpdate
+from app.models import User, VaultUpdate
 import requests
 import base64
 import grab_favicon as gf

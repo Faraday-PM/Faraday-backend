@@ -1,11 +1,21 @@
-FROM python:3.11
+FROM python:3.9
 
-WORKDIR /faraday
+#  
 
-COPY requirements.txt /faraday/requirements.txt
+EXPOSE 8000
 
-RUN pip install --no-cache-dir --upgrade -r /faraday/requirements.txt
+WORKDIR /code
 
-COPY / /faraday/
+# 
+COPY ./requirements.txt /code/requirements.txt
 
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "80"]
+COPY ./app/config.faraday.json /code/config.faraday.json
+
+# 
+RUN pip install --no-cache-dir --upgrade -r /code/requirements.txt
+
+# 
+COPY ./app /code/app
+
+# 
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
