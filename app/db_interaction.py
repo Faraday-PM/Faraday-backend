@@ -90,6 +90,7 @@ class DatabaseHandler:
 
 # Sqlalchemy boilerplate
 # Generating sqlalchemy stuff
+print(config["DATABASE_URL"])
 engine = create_engine(config["DATABASE_URL"], echo=True)
 Base.metadata.create_all(bind=engine)
 

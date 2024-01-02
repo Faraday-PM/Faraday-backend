@@ -9,8 +9,7 @@ WORKDIR /code
 # 
 COPY ./requirements.txt /code/requirements.txt
 
-COPY ./app/config.faraday.json /code/config.faraday.json
-
+ENV FARADAY_DATABASE_URL="INSERT URL HERE"
 # 
 RUN pip install --no-cache-dir --upgrade -r /code/requirements.txt
 
