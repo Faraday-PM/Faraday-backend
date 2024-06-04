@@ -1,6 +1,8 @@
 import os
 from typing import TypedDict
+from dotenv import load_dotenv
 
+load_dotenv()
 
 """# Skips having to rewrite the same code in nearly every file
 def load_config() -> dict:
@@ -15,6 +17,7 @@ class config_type(TypedDict):
     DATABASE_URL: str
     salt: str
     format: str
+
 
 def load_config() -> config_type:
     return {
