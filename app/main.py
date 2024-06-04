@@ -9,7 +9,9 @@ from app.models import User, VaultUpdate
 import requests
 import base64
 import grab_favicon as gf
+from dotenv import load_dotenv
 
+load_dotenv()
 
 db: db_interaction.DatabaseHandler = db_interaction.DatabaseHandler()
 
