@@ -36,6 +36,12 @@ app.add_middleware(
 async def root():
     return {"msg": "message"}
 
+@app.get("/details")
+async def details():
+    return {
+        "allowConns": config["allowConns"],
+        "email": config["email"]
+    }
 
 @app.post("/register")
 async def register(user: User):
