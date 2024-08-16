@@ -36,12 +36,14 @@ app.add_middleware(
 async def root():
     return {"msg": "message"}
 
+
 @app.get("/details")
 async def details():
     return {
         "allowConns": config["allowConns"],
         "email": config["email"]
     }
+
 
 @app.post("/register")
 async def register(user: User):
@@ -91,13 +93,12 @@ async def get_favicon(url: str):
 
 
 # Hopefully protected and no security flaws
+# Don't this this is the right way
 @app.post("/iv")
-async def getIv(user: User):
-    hashed_password = derive_auth_key(
-        user.password, config["salt"].encode(config["format"]))
-    res: str = db.login(user.username, hashed_password)
-    if res == "Successfully authenticated!":
-        iv = db.get_iv(user.username)
-        return {"msg": res, "iv": iv}
+async def getIv(user: str):
+    iv = db.get_iv(user)
+
+    if iv != "":
+        return iv
     else:
-        return {"msg": "User not found"}
+        return HTTPException(status_code=400, detail="No IV found")
