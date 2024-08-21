@@ -15,18 +15,17 @@ config: dict = load_config()
 Base = declarative_base()
 
 
-class Salt(Base):
-    __tablename__ = "salts"
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    username = Column(String, ForeignKey("users.username"), unique=True)
-    salt = Column(String, nullable=False)
-
 class User(Base):
     __tablename__ = "users"
     id = Column(Integer, primary_key=True, autoincrement=True)
     username = Column(String, unique=True, nullable=False)
     password = Column(String, nullable=False)
 
+class Salt(Base):
+    __tablename__ = "salts"
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    username = Column(String, ForeignKey("users.username"), unique=True)
+    salt = Column(String, nullable=False)
 
 class Vault(Base):
     __tablename__ = "vaults"
@@ -59,7 +58,7 @@ class DatabaseHandler:
     def create_user(username: str, password: str, salt: bytes) -> str:
         try:
             user: User = User(username=username, password=password)
-            session.rollback()
+           # session.rollback()
             session.add(user)
             session.commit()
             s = DatabaseHandler._create_salt(salt, username)
