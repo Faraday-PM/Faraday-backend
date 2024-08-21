@@ -58,7 +58,7 @@ class DatabaseHandler:
     def create_user(username: str, password: str, salt: bytes) -> str:
         try:
             user: User = User(username=username, password=password)
-           # session.rollback()
+            session.rollback()
             session.add(user)
             session.commit()
             s = DatabaseHandler._create_salt(salt, username)
