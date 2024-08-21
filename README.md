@@ -35,3 +35,7 @@ source run.sh
 # Windows
 ./run.bat
 ```
+
+### Problems?
+
+Message me on discord @a3l6
