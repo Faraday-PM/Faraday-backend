@@ -6,10 +6,10 @@ import app.db_interaction as db_interaction
 from app.util.common import load_config
 from typing import Annotated
 from app.models import User, VaultUpdate
-import requests
 import base64
 import grab_favicon as gf
 from dotenv import load_dotenv
+import os
 
 load_dotenv()
 
@@ -47,9 +47,10 @@ async def details():
 
 @app.post("/register")
 async def register(user: User):
+    salt = os.urandom(64)
     hashed_password = derive_auth_key(
-        user.password, config["salt"].encode(config["format"]))
-    res = db.create_user(user.username, hashed_password)
+        user.password, salt)
+    res = db.create_user(user.username, hashed_password, salt)
     db.create_vault(user.username)
     return {"msg": res}
 
@@ -57,8 +58,9 @@ async def register(user: User):
 # Get vault
 @app.post("/auth")
 async def login(user: User):
+    salt = db.get_salt(user.username)
     hashed_password = derive_auth_key(
-        user.password, config["salt"].encode(config["format"]))
+        user.password, salt)
     res: str = db.login(user.username, hashed_password)
 
     base64_vault: str = db.get_vault(user.username)
@@ -71,8 +73,9 @@ async def login(user: User):
 # Update vault
 @app.post("/vault")
 async def update_vault(user: VaultUpdate):
+    salt = db.get_salt(user.username)
     hashed_password = derive_auth_key(
-        user.password, config["salt"].encode(config["format"]))
+        user.password, salt)
     res: str = db.login(user.username, hashed_password)
     db.update_vault(user.username, user.vault)
     return {"msg": res}

@@ -1,5 +1,7 @@
 sql_app4.db
+*.db
 venv/
 __pycache__/
 .venv/
 .env
+.VSCodeCounter/
