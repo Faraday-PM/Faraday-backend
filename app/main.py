@@ -10,6 +10,8 @@ import base64
 import grab_favicon as gf
 from dotenv import load_dotenv
 import os
+import app.util.reloader as reloader
+
 
 load_dotenv()
 
@@ -105,3 +107,6 @@ async def getIv(user: str):
         return iv
     else:
         return HTTPException(status_code=400, detail="No IV found")
+
+
+reloader.dispatch_thread()

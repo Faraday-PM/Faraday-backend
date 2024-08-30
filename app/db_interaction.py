@@ -21,11 +21,13 @@ class User(Base):
     username = Column(String, unique=True, nullable=False)
     password = Column(String, nullable=False)
 
+
 class Salt(Base):
     __tablename__ = "salts"
     id = Column(Integer, primary_key=True, autoincrement=True)
     username = Column(String, ForeignKey("users.username"), unique=True)
     salt = Column(String, nullable=False)
+
 
 class Vault(Base):
     __tablename__ = "vaults"
@@ -47,7 +49,7 @@ class DatabaseHandler:
             return True
         except sqlalchemy.exec.IntegrityError:
             return False
-    
+
     @staticmethod
     def get_salt(username: str) -> bytes:
         cursor = session.query(Salt).filter(Salt.username == username)
@@ -63,7 +65,8 @@ class DatabaseHandler:
             session.commit()
             s = DatabaseHandler._create_salt(salt, username)
             if s is None:
-                raise HTTPException(status_code=500, detail="Unable to create salt")
+                raise HTTPException(
+                    status_code=500, detail="Unable to create salt")
         except sqlalchemy.exc.IntegrityError:
             raise HTTPException(status_code=400, detail="User already exists")
         return "Added User Successfully!"
@@ -115,7 +118,7 @@ class DatabaseHandler:
 
 # Sqlalchemy boilerplate
 # Generating sqlalchemy stuff
-print(config["DATABASE_URL"])
+# print(config["DATABASE_URL"])
 engine = create_engine(config["DATABASE_URL"], echo=True)
 Base.metadata.create_all(bind=engine)
 
